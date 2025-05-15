@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visualizzatore Fatture Elettroniche</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>Visualizzatore Fatture Elettroniche</h1>
+      <p class="app-description">Carica, visualizza, modifica ed esporta le tue fatture elettroniche</p>
+    </header>
+
+    <main class="main-content">
+      <div class="container">
+        <div class="row">
+          <!-- Upload Section -->
+          <div class="col-md-12 mb-4">
+            <div class="card">
+              <div class="card-header">
+                <h2>Carica Fattura</h2>
+              </div>
+              <div class="card-body">
+                <div id="file-upload-container" class="file-upload-container"></div>
+                <div id="file-info" class="file-info hidden">
+                  <p>File: <span id="file-name"></span></p>
+                  <button id="remove-file" class="btn btn-danger btn-sm">
+                    <i class="fas fa-times"></i> Rimuovi
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Data Display -->
+          <div class="col-md-12">
+            <div id="invoice-data-container" class="card hidden">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>Dati Fattura</h2>
+                <button id="export-pdf" class="btn btn-primary">
+                  <i class="fas fa-file-pdf"></i> Esporta PDF
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="loading-indicator" class="loading-indicator hidden">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Caricamento...</span>
+                  </div>
+                  <p>Elaborazione in corso...</p>
+                </div>
+
+                <div id="invoice-content" class="invoice-content">
+                  <div class="row">
+                    <!-- Cedente/Prestatore -->
+                    <div class="col-md-6 mb-4">
+                      <div class="invoice-section">
+                        <h3>Cedente/Prestatore</h3>
+                        <div id="cedente-data" class="data-section"></div>
+                      </div>
+                    </div>
+
+                    <!-- Cessionario/Committente -->
+                    <div class="col-md-6 mb-4">
+                      <div class="invoice-section">
+                        <h3>Cessionario/Committente</h3>
+                        <div id="cessionario-data" class="data-section"></div>
+                      </div>
+                    </div>
+
+                    <!-- Dati Generali -->
+                    <div class="col-md-12 mb-4">
+                      <div class="invoice-section">
+                        <h3>Dati Generali</h3>
+                        <div id="dati-generali" class="data-section"></div>
+                      </div>
+                    </div>
+
+                    <!-- Dettaglio Linee -->
+                    <div class="col-md-12">
+                      <div class="invoice-section">
+                        <h3>Dettaglio Linee</h3>
+                        <div id="dettaglio-linee" class="data-section">
+                          <table class="table table-striped">
+                            <thead>
+                              <tr>
+                                <th>Descrizione</th>
+                                <th>Quantità</th>
+                                <th>Prezzo Unitario</th>
+                                <th>Aliquota IVA</th>
+                                <th>Importo</th>
+                              </tr>
+                            </thead>
+                            <tbody id="invoice-items"></tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Dati Pagamento -->
+                    <div class="col-md-12 mt-4">
+                      <div class="invoice-section">
+                        <h3>Dati Pagamento</h3>
+                        <div id="dati-pagamento" class="data-section"></div>
+                      </div>
+                    </div>
+
+                    <!-- Riepilogo IVA -->
+                    <div class="col-md-12 mt-4">
+                      <div class="invoice-section">
+                        <h3>Riepilogo IVA</h3>
+                        <div id="riepilogo-iva" class="data-section"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="error-container" class="error-container alert alert-danger hidden">
+                  <p id="error-message"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>&copy; 2025 Visualizzatore Fatture Elettroniche</p>
+    </footer>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- App Scripts -->
+  <script type="module" src="js/fileUploader.js" defer ></script>
+  <script type="module" src="js/index.js" defer ></script>
+  <script type="module" src="js/dataDisplay.js" defer ></script>
+  <script type="module" src="js/pdfExporter.js" defer ></script>
+  <script type="module" src="js/xmlParser.js" defer ></script>
+  <script type="module" src="js/app.js" defer></script>
+</body>
+</html>
