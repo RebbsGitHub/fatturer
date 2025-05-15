@@ -1,7 +1,4 @@
-/**
- * index.js - Punto di ingresso dell'applicazione
- * Inizializza l'applicazione e gestisce gli eventi a livello globale
- */
+import { App } from './app.js'; 
 
 // Attendi il caricamento completo del DOM
 document.addEventListener('DOMContentLoaded', () => {
