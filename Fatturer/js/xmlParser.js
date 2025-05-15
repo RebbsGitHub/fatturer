@@ -1,4 +1,4 @@
-class XmlParser {
+export class XmlParser {
     parseXmlContent(xmlContent) {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
