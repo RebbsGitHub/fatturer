@@ -36,13 +36,13 @@ function setupInterComponentCommunication() {
         removeFileButton.addEventListener('click', () => {
             console.log('Rimozione del file richiesta');
             // Resetta il file uploader
-            if (window.appInstance.fileUploader) {
-                window.appInstance.fileUploader.reset();
+            if (window.app.fileUploader) {
+                window.app.fileUploader.reset();
             }
             
             // Resetta lo stato dell'applicazione
-            if (window.appInstance) {
-                window.appInstance.resetState();
+            if (window.app) {
+                window.app.resetState();
             }
         });
     }
@@ -59,8 +59,8 @@ function setupGlobalErrorHandling() {
         console.error('Errore globale rilevato:', event.error);
         
         // Mostra un messaggio di errore appropriato nell'interfaccia
-        if (window.appInstance) {
-            window.appInstance.showError('Si è verificato un errore imprevisto. Ricarica la pagina e riprova.');
+        if (window.app) {
+            window.app.showError('Si è verificato un errore imprevisto. Ricarica la pagina e riprova.');
         }
         
         // Impedisce la visualizzazione dell'errore nella console del browser
