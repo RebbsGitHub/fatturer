@@ -1,7 +1,7 @@
 import FileUploader from './FileUploader.js';
 import DataDisplay from './DataDisplay.js';
 import PdfExporter from './PdfExporter.js';
-import XmlParser from './xmlParser.js';
+import { XmlParser } from './xmlParser.js';
 
 class App {
     constructor() {
@@ -127,4 +127,6 @@ initEventListeners() {
     }
 }
 
-window.app = new App();
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new App();
+});
