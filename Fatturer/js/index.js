@@ -9,9 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = new App();
     
     // Registra l'app nella finestra per l'accesso globale (utile per debug)
-    window.appInstance = app;
-    
-    console.log('Visualizzatore Fatture Elettroniche inizializzato');
+    try {
+        // Verifichiamo se window.app esiste
+        if (!window.app) {
+            // Se non esiste già, creiamo un'istanza di App
+            window.app = new App();
+        }
+        
+        console.log('Applicazione inizializzata correttamente');
+    } catch (error) {
+        console.error('Errore durante l\'inizializzazione dell\'app:', error);
+    }
     
     // Gestisci la comunicazione tra i componenti
     setupInterComponentCommunication();
