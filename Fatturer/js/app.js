@@ -3,7 +3,7 @@ import DataDisplay from './DataDisplay.js';
 import PdfExporter from './PdfExporter.js';
 import { XmlParser } from './xmlParser.js';
 
-class App {
+export class App {
     constructor() {
         this.state = {
             fileLoaded: false,
@@ -18,7 +18,7 @@ class App {
         this.fileUploader = new FileUploader(this.handleFileUploaded.bind(this));
         this.dataDisplay = new DataDisplay('invoice-data-container');
         this.pdfExporter = new PdfExporter();
-
+        this.errorMessage = document.getElementById('error-message');
         this.invoiceDataContainer = document.getElementById('invoice-data-container');
         this.loadingIndicator = document.getElementById('loading-indicator');
         this.errorContainer = document.getElementById('error-container');
