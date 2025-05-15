@@ -21,9 +21,6 @@ class App {
         this.invoiceDataContainer = document.getElementById('invoice-data-container');
         this.loadingIndicator = document.getElementById('loading-indicator');
         this.errorContainer = document.getElementById('error-container');
-        this.errorMessage = document.getElementById('error-message');
-        this.exportPdfButton = document.getElementById('export-pdf');
-
         this.initEventListeners();
     }
 
