@@ -1,6 +1,7 @@
 import FileUploader from './FileUploader.js';
 import DataDisplay from './DataDisplay.js';
 import PdfExporter from './PdfExporter.js';
+import XmlParser from './XmlParser.js';
 
 class App {
     constructor() {
@@ -49,6 +50,7 @@ initEventListeners() {
 
         try {
             const parsedData = this.xmlParser.parseXmlContent(content);
+            console.log('Dati parsati:', parsedData);
             this.updateState({
                 parsedData: parsedData,
                 isLoading: false
@@ -84,6 +86,7 @@ initEventListeners() {
     }
 
     renderInvoiceData() {
+        
         if (!this.state.parsedData) return;
         this.hideLoading();
         this.invoiceDataContainer.classList.remove('hidden');
@@ -124,4 +127,6 @@ initEventListeners() {
     }
 }
 
-window.App = App;
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new App();
+});
