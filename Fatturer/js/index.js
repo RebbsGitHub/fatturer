@@ -5,9 +5,7 @@
 
 // Attendi il caricamento completo del DOM
 document.addEventListener('DOMContentLoaded', () => {
-    // Inizializza l'applicazione
-    const app = new App();
-    
+
     // Registra l'app nella finestra per l'accesso globale (utile per debug)
     try {
         // Verifichiamo se window.app esiste
