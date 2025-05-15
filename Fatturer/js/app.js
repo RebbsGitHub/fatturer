@@ -25,14 +25,15 @@ class App {
     }
 
 initEventListeners() {
-    this.exportPdfButton = document.getElementById('export-pdf');
-
-    if (this.exportPdfButton) {
-        this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
-    } else {
-        console.error('Elemento #export-pdf non trovato.');
+    document.addEventListener('DOMContentLoaded', () => {
+            this.exportPdfButton = document.getElementById('export-pdf');
+            if (this.exportPdfButton) {
+                this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
+            } else {
+                console.error('Elemento #export-pdf non trovato.');
+            }
+        });
     }
-}
 
 
     handleFileUploaded(file, content) {
