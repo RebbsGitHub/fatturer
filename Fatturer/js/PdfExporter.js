@@ -9,9 +9,12 @@
 
 class PdfExporter {
     constructor() {
-        // Verifica che jsPDF sia disponibile - correzione per supportare diverse versioni della libreria
+        console.log('PdfExporter inizializzato');
+        // Verifica che jsPDF sia disponibile (compatibile con la versione UMD)
         if (typeof jspdf === 'undefined' && typeof jsPDF === 'undefined') {
             console.error('jsPDF non è disponibile. Assicurati di includerlo prima di utilizzare PdfExporter.');
+        } else {
+            console.log('jsPDF trovato correttamente');
         }
     }
 
@@ -26,11 +29,16 @@ class PdfExporter {
                 if (!invoiceData) {
                     throw new Error('Dati della fattura non validi');
                 }
+                
+                console.log('Generazione PDF iniziata con dati:', invoiceData);
 
                 // Crea un nuovo documento PDF - supporto per diverse versioni di jsPDF
                 let doc;
-                if (typeof jspdf !== 'undefined' && jspdf.jsPDF) {
-                    // Nuova versione come modulo ES
+                
+                // Verifica il formato disponibile di jsPDF (UMD vs globale)
+                if (typeof jspdf !== 'undefined') {
+                    console.log('Usando jspdf in formato UMD');
+                    // Versione UMD (come importato nel file HTML)
                     const { jsPDF } = jspdf;
                     doc = new jsPDF({
                         orientation: 'portrait',
@@ -38,7 +46,8 @@ class PdfExporter {
                         format: 'a4'
                     });
                 } else if (typeof jsPDF !== 'undefined') {
-                    // Versione globale
+                    console.log('Usando jsPDF come oggetto globale');
+                    // Versione globale (possibile fallback)
                     doc = new jsPDF({
                         orientation: 'portrait',
                         unit: 'mm',
@@ -230,6 +239,7 @@ class PdfExporter {
 
                 // Genera il blob del PDF
                 const pdfBlob = doc.output('blob');
+                console.log('PDF generato con successo');
                 
                 // Crea URL per il download
                 const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -246,6 +256,7 @@ class PdfExporter {
      * Esporta i dati della fattura in PDF e avvia il download
      */
     exportToPdf(invoiceData) {
+        console.log('Inizio esportazione PDF');
         return this.generatePdf(invoiceData)
             .then(pdfUrl => {
                 // Crea un link temporaneo per il download
@@ -269,6 +280,7 @@ class PdfExporter {
                     URL.revokeObjectURL(pdfUrl);
                 }, 100);
                 
+                console.log('PDF scaricato con successo:', fileName);
                 return { success: true, fileName };
             })
             .catch(error => {
