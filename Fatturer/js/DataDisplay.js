@@ -16,9 +16,9 @@ class DataDisplay {
                 id: 'header', 
                 title: 'Intestazione Fattura',
                 fields: [
-                    { key: 'numero', label: 'Numero Fattura', editable: false },
-                    { key: 'data', label: 'Data Fattura', editable: false },
-                    { key: 'tipoDocumento', label: 'Tipo Documento', editable: false },
+                    { key: 'header.number', label: 'Numero Fattura', editable: false },
+                    { key: 'header.date', label: 'Data Fattura', editable: false },
+                    { key: 'header.version', label: 'Tipo Documento', editable: false },
                     { key: 'valuta', label: 'Valuta', editable: false },
                     { key: 'importoTotale', label: 'Importo Totale', editable: false }
                 ]
@@ -27,9 +27,9 @@ class DataDisplay {
                 id: 'fornitore', 
                 title: 'Dati Fornitore',
                 fields: [
-                    { key: 'fornitore.denominazione', label: 'Denominazione', editable: false },
-                    { key: 'fornitore.partitaIVA', label: 'Partita IVA', editable: false },
-                    { key: 'fornitore.codiceFiscale', label: 'Codice Fiscale', editable: false },
+                    { key: 'supplier.name', label: 'Denominazione', editable: false },
+                    { key: 'supplier.vat', label: 'Partita IVA', editable: false },
+                    { key: 'supplier.taxCode', label: 'Codice Fiscale', editable: false },
                     { key: 'fornitore.regime', label: 'Regime Fiscale', editable: false }
                 ]
             },
@@ -37,13 +37,13 @@ class DataDisplay {
                 id: 'cliente', 
                 title: 'Dati Cliente',
                 fields: [
-                    { key: 'cliente.denominazione', label: 'Denominazione', editable: true },
-                    { key: 'cliente.partitaIVA', label: 'Partita IVA', editable: true },
-                    { key: 'cliente.codiceFiscale', label: 'Codice Fiscale', editable: true },
-                    { key: 'cliente.indirizzo', label: 'Indirizzo', editable: true },
-                    { key: 'cliente.cap', label: 'CAP', editable: true },
-                    { key: 'cliente.comune', label: 'Comune', editable: true },
-                    { key: 'cliente.provincia', label: 'Provincia', editable: true }
+                    { key: 'customer.name', label: 'Denominazione', editable: true },
+                    { key: 'customer.vat', label: 'Partita IVA', editable: true },
+                    { key: 'customer.taxCode', label: 'Codice Fiscale', editable: true },
+                    { key: 'customer.address', label: 'Indirizzo', editable: true },
+                    { key: 'customer.zip', label: 'CAP', editable: true },
+                    { key: 'customer.city', label: 'Comune', editable: true },
+                    { key: 'customer.province', label: 'Provincia', editable: true }
                 ]
             },
             { 
@@ -99,7 +99,12 @@ class DataDisplay {
     getNestedValue(obj, path) {
         if (!obj) return '';
         const keys = path.split('.');
-        return keys.reduce((o, key) => (o && o[key] !== undefined) ? o[key] : '', obj);
+        try {
+            return keys.reduce((o, key) => (o && o[key] !== undefined) ? o[key] : '', obj);
+        } catch (e) {
+            console.error(`Errore nell'accesso al percorso ${path}:`, e);
+            return '';
+        }
     }
 
     /**
@@ -120,6 +125,8 @@ class DataDisplay {
      * Aggiorna la visualizzazione con i dati della fattura
      */
     displayInvoiceData(data) {
+        console.log('displayInvoiceData chiamato con:', data);
+        
         if (!data) {
             console.error('Nessun dato da visualizzare');
             return;
@@ -132,13 +139,22 @@ class DataDisplay {
 
         // Aggiorna l'indicatore di stato
         const statusIndicator = document.getElementById('statusIndicator');
-        statusIndicator.innerHTML = `
-            <span class="status-text">Fattura caricata</span>
-            <span class="status-detail">Numero: ${data.numero || 'N/A'} - Data: ${data.data || 'N/A'}</span>
-        `;
+        if (statusIndicator) {
+            const invoiceNumber = this.getNestedValue(data, 'header.number') || 'N/A';
+            const invoiceDate = this.getNestedValue(data, 'header.date') || 'N/A';
+            statusIndicator.innerHTML = `
+                <span class="status-text">Fattura caricata</span>
+                <span class="status-detail">Numero: ${invoiceNumber} - Data: ${invoiceDate}</span>
+            `;
+        }
 
         // Genera la visualizzazione dei dati
         const dataContent = document.getElementById('dataContent');
+        if (!dataContent) {
+            console.error('Elemento dataContent non trovato');
+            return;
+        }
+        
         dataContent.innerHTML = '';
 
         // Crea le sezioni
@@ -155,6 +171,10 @@ class DataDisplay {
             dataContent.appendChild(sectionElement);
             
             const sectionContent = document.getElementById(`section-${section.id}`);
+            if (!sectionContent) {
+                console.error(`Elemento section-${section.id} non trovato`);
+                return;
+            }
             
             // Crea la tabella per i campi
             const table = document.createElement('table');
@@ -163,6 +183,8 @@ class DataDisplay {
             // Aggiungi i campi
             section.fields.forEach(field => {
                 const value = this.getNestedValue(this.invoiceData, field.key);
+                console.log(`Campo ${field.key} => valore: "${value}"`);
+                
                 const tr = document.createElement('tr');
                 
                 tr.innerHTML = `
@@ -194,7 +216,8 @@ class DataDisplay {
                 this.modifiedFields.add(fieldKey);
                 
                 // Abilita il pulsante per resettare le modifiche
-                document.getElementById('resetChangesBtn').disabled = false;
+                const resetBtn = document.getElementById('resetChangesBtn');
+                if (resetBtn) resetBtn.disabled = false;
                 
                 // Notifica il cambiamento
                 this.notifyDataChanged();
@@ -202,7 +225,8 @@ class DataDisplay {
         });
 
         // Abilita il pulsante di esportazione
-        document.getElementById('exportToPdfBtn').disabled = false;
+        const exportBtn = document.getElementById('exportToPdfBtn');
+        if (exportBtn) exportBtn.disabled = false;
     }
 
     /**
@@ -226,7 +250,8 @@ class DataDisplay {
         this.modifiedFields.clear();
         
         // Disabilita il pulsante di reset
-        document.getElementById('resetChangesBtn').disabled = true;
+        const resetBtn = document.getElementById('resetChangesBtn');
+        if (resetBtn) resetBtn.disabled = true;
         
         // Notifica il cambiamento
         this.notifyDataChanged();
@@ -270,6 +295,8 @@ class DataDisplay {
      */
     showError(message) {
         const dataContent = document.getElementById('dataContent');
+        if (!dataContent) return;
+        
         dataContent.innerHTML = `
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
@@ -279,13 +306,18 @@ class DataDisplay {
         
         // Aggiorna l'indicatore di stato
         const statusIndicator = document.getElementById('statusIndicator');
-        statusIndicator.innerHTML = `
-            <span class="status-text error">Errore</span>
-        `;
+        if (statusIndicator) {
+            statusIndicator.innerHTML = `
+                <span class="status-text error">Errore</span>
+            `;
+        }
         
         // Disabilita i pulsanti
-        document.getElementById('resetChangesBtn').disabled = true;
-        document.getElementById('exportToPdfBtn').disabled = true;
+        const resetBtn = document.getElementById('resetChangesBtn');
+        if (resetBtn) resetBtn.disabled = true;
+        
+        const exportBtn = document.getElementById('exportToPdfBtn');
+        if (exportBtn) exportBtn.disabled = true;
     }
 
     /**
