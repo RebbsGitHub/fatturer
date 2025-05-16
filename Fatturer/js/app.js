@@ -15,7 +15,14 @@ export class App {
         };
 
         this.xmlParser = new XmlParser();
-        this.fileUploader = new FileUploader(this.handleFileUploaded.bind(this));
+        
+        // Inizializza FileUploader con l'oggetto options corretto
+        this.fileUploader = new FileUploader({
+            containerId: 'file-upload-container',
+            onFileLoaded: this.handleFileLoaded.bind(this),
+            onError: this.handleFileError.bind(this)
+        });
+        
         this.dataDisplay = new DataDisplay('invoice-data-container');
         this.pdfExporter = new PdfExporter();
         this.errorMessage = document.getElementById('error-message');
@@ -23,25 +30,30 @@ export class App {
         this.loadingIndicator = document.getElementById('loading-indicator');
         this.errorContainer = document.getElementById('error-container');
         this.initEventListeners();
+        
+        console.log('App inizializzata');
     }
 
-initEventListeners() {
-    document.addEventListener('DOMContentLoaded', () => {
+    initEventListeners() {
+        document.addEventListener('DOMContentLoaded', () => {
             this.exportPdfButton = document.getElementById('export-pdf');
             if (this.exportPdfButton) {
                 this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
             } else {
                 console.error('Elemento #export-pdf non trovato.');
             }
+            console.log('Event listeners inizializzati');
         });
     }
 
-
-    handleFileUploaded(file, content) {
+    // Nuovo metodo per gestire il file caricato dal FileUploader
+    handleFileLoaded(fileData) {
+        console.log('File caricato:', fileData);
+        
         this.updateState({
             fileLoaded: true,
-            fileName: file.name,
-            fileContent: content,
+            fileName: fileData.file.name,
+            fileContent: fileData.content,
             isLoading: true,
             error: null
         });
@@ -49,21 +61,45 @@ initEventListeners() {
         this.showLoading();
 
         try {
-            const parsedData = this.xmlParser.parseXmlContent(content);
-            console.log('Dati parsati:', parsedData);
-            this.updateState({
-                parsedData: parsedData,
-                isLoading: false
-            });
-            this.renderInvoiceData();
+            if (fileData.fileType === 'xml') {
+                const parsedData = this.xmlParser.parseXmlContent(fileData.content);
+                console.log('Dati parsati:', parsedData);
+                this.updateState({
+                    parsedData: parsedData,
+                    isLoading: false
+                });
+                this.renderInvoiceData();
+            } else {
+                throw new Error('Formato file non supportato. Carica un file XML.');
+            }
         } catch (error) {
-            console.error('Errore durante l\'analisi del file XML:', error);
+            console.error('Errore durante l\'analisi del file:', error);
             this.updateState({
                 isLoading: false,
                 error: `Errore durante l'elaborazione del file: ${error.message || 'Formato non valido'}`
             });
             this.showError();
         }
+    }
+
+    // Nuovo metodo per gestire gli errori del FileUploader
+    handleFileError(error) {
+        console.error('Errore di caricamento file:', error);
+        this.updateState({
+            isLoading: false,
+            error: `Errore di caricamento: ${error.message || 'Errore sconosciuto'}`
+        });
+        this.showError();
+    }
+
+    // Il vecchio metodo rimane come compatibilità ma ora delega al nuovo
+    handleFileUploaded(file, content) {
+        console.log('Metodo deprecato handleFileUploaded chiamato');
+        this.handleFileLoaded({
+            file: file,
+            fileType: file.name.toLowerCase().endsWith('.xml') ? 'xml' : 'unknown',
+            content: content
+        });
     }
 
     handleExportPdf() {
@@ -86,32 +122,47 @@ initEventListeners() {
     }
 
     renderInvoiceData() {
-        
         if (!this.state.parsedData) return;
         this.hideLoading();
         this.invoiceDataContainer.classList.remove('hidden');
+        console.log('Visualizzazione dati fattura:', this.state.parsedData);
         this.dataDisplay.displayInvoiceData(this.state.parsedData);
     }
 
     showLoading() {
-        this.invoiceDataContainer.classList.remove('hidden');
-        this.loadingIndicator.classList.remove('hidden');
+        if (this.loadingIndicator) {
+            this.loadingIndicator.classList.remove('hidden');
+        }
+        if (this.invoiceDataContainer) {
+            this.invoiceDataContainer.classList.remove('hidden');
+        }
         this.hideError();
+        console.log('Visualizzazione caricamento');
     }
 
     hideLoading() {
-        this.loadingIndicator.classList.add('hidden');
+        if (this.loadingIndicator) {
+            this.loadingIndicator.classList.add('hidden');
+        }
+        console.log('Nascosto caricamento');
     }
 
     showError(message = null) {
         const errorMsg = message || this.state.error;
         if (!errorMsg) return;
-        this.errorMessage.textContent = errorMsg;
-        this.errorContainer.classList.remove('hidden');
+        if (this.errorMessage) {
+            this.errorMessage.textContent = errorMsg;
+        }
+        if (this.errorContainer) {
+            this.errorContainer.classList.remove('hidden');
+        }
+        console.error('Errore visualizzato:', errorMsg);
     }
 
     hideError() {
-        this.errorContainer.classList.add('hidden');
+        if (this.errorContainer) {
+            this.errorContainer.classList.add('hidden');
+        }
     }
 
     resetState() {
@@ -123,10 +174,13 @@ initEventListeners() {
             isLoading: false,
             error: null
         });
-        this.invoiceDataContainer.classList.add('hidden');
+        if (this.invoiceDataContainer) {
+            this.invoiceDataContainer.classList.add('hidden');
+        }
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM caricato, inizializzazione App');
     window.app = new App();
 });
