@@ -1,7 +1,6 @@
-
-import FileUploader from './FileUploader.js';
-import DataDisplay from './DataDisplay.js';
-import PdfExporter from './PdfExporter.js';
+import FileUploader from './fileUploader.js';
+import DataDisplay from './dataDisplay.js';
+import PdfExporter from './pdfExporter.js';
 import { XmlParser } from './xmlParser.js';
 
 export class App {
@@ -23,38 +22,55 @@ export class App {
         });
         this.dataDisplay = new DataDisplay('invoice-data-container');
         this.pdfExporter = new PdfExporter();
+        
+        // DOM elements
         this.errorMessage = document.getElementById('error-message');
         this.invoiceDataContainer = document.getElementById('invoice-data-container');
         this.loadingIndicator = document.getElementById('loading-indicator');
         this.errorContainer = document.getElementById('error-container');
         
-        // Inizializza subito il pulsante di export se disponibile
-        this.exportPdfButton = document.getElementById('export-pdf');
-        if (this.exportPdfButton) {
-            this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
-            console.log('Export PDF button inizializzato');
-        } else {
-            console.warn('Elemento #export-pdf non trovato nel DOM al caricamento. Verrà cercato dopo il caricamento completo.');
-        }
+        // Inizializzazione sicura degli elementi che potrebbero non essere ancora nel DOM
+        this.initElements();
         
-        this.initEventListeners();
         console.log('App inizializzata');
     }
 
-    initEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
-            // Se il pulsante non è stato trovato nel costruttore, riprova qui
-            if (!this.exportPdfButton) {
-                this.exportPdfButton = document.getElementById('export-pdf');
-                if (this.exportPdfButton) {
-                    this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
+    initElements() {
+        // Funzione per controllare e configurare gli elementi DOM in modo sicuro
+        const initExportButton = () => {
+            console.log('Cerco il pulsante export-pdf');
+            this.exportPdfButton = document.getElementById('export-pdf');
+            if (this.exportPdfButton) {
+                console.log('Elemento #export-pdf trovato, aggiungo event listener');
+                this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
+                return true;
+            }
+            console.warn('Elemento #export-pdf non trovato');
+            return false;
+        };
+
+        // Prova a inizializzare immediatamente
+        const buttonFound = initExportButton();
+        
+        // Se non è stato trovato, riprova dopo DOMContentLoaded
+        if (!buttonFound) {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOMContentLoaded: riprovo a cercare export-pdf');
+                if (initExportButton()) {
                     console.log('Export PDF button inizializzato dopo DOMContentLoaded');
                 } else {
-                    console.error('Elemento #export-pdf non trovato anche dopo DOMContentLoaded.');
+                    // Se ancora non trovato, riprova dopo un breve timeout
+                    setTimeout(() => {
+                        console.log('Timeout: ultimo tentativo di cercare export-pdf');
+                        if (initExportButton()) {
+                            console.log('Export PDF button inizializzato dopo timeout');
+                        } else {
+                            console.error('Elemento #export-pdf non trovato definitivamente. Controlla l\'HTML.');
+                        }
+                    }, 500);
                 }
-            }
-            console.log('Event listeners inizializzati');
-        });
+            });
+        }
     }
 
     handleFileLoaded(fileData) {
@@ -84,6 +100,14 @@ export class App {
                 if (this.exportPdfButton) {
                     this.exportPdfButton.disabled = false;
                     console.log('Export PDF button abilitato');
+                } else {
+                    // Se il pulsante non è stato trovato in precedenza, riprova qui
+                    console.log('Riprovo a cercare #export-pdf dopo il caricamento del file');
+                    this.exportPdfButton = document.getElementById('export-pdf');
+                    if (this.exportPdfButton) {
+                        this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
+                        console.log('Export PDF button trovato e inizializzato dopo il caricamento del file');
+                    }
                 }
             } else {
                 throw new Error('Formato file non supportato. Carica un file XML.');
@@ -207,8 +231,16 @@ export class App {
     }
 }
 
-// Assicurati che l'App venga inizializzata dopo il caricamento del DOM
-window.addEventListener('DOMContentLoaded', () => {
+// Garantisci che l'App venga inizializzata dopo che il DOM è completamente caricato
+document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM caricato, inizializzazione App');
     window.app = new App();
 });
+
+// Fallback per supportare l'inizializzazione esistente
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    console.log('DOM già caricato, inizializzazione App immediata');
+    if (!window.app) {
+        window.app = new App();
+    }
+}
