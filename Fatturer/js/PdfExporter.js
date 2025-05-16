@@ -9,8 +9,8 @@
 
 class PdfExporter {
     constructor() {
-        // Verifica che jsPDF sia disponibile
-        if (typeof jspdf === 'undefined' || !jspdf.jsPDF) {
+        // Verifica che jsPDF sia disponibile - correzione per supportare diverse versioni della libreria
+        if (typeof jspdf === 'undefined' && typeof jsPDF === 'undefined') {
             console.error('jsPDF non è disponibile. Assicurati di includerlo prima di utilizzare PdfExporter.');
         }
     }
@@ -27,13 +27,26 @@ class PdfExporter {
                     throw new Error('Dati della fattura non validi');
                 }
 
-                // Crea un nuovo documento PDF
-                const { jsPDF } = jspdf;
-                const doc = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'mm',
-                    format: 'a4'
-                });
+                // Crea un nuovo documento PDF - supporto per diverse versioni di jsPDF
+                let doc;
+                if (typeof jspdf !== 'undefined' && jspdf.jsPDF) {
+                    // Nuova versione come modulo ES
+                    const { jsPDF } = jspdf;
+                    doc = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                } else if (typeof jsPDF !== 'undefined') {
+                    // Versione globale
+                    doc = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                } else {
+                    throw new Error('jsPDF non è disponibile');
+                }
 
                 // Impostazioni documento
                 const pageWidth = doc.internal.pageSize.getWidth();
