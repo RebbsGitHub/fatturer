@@ -15,14 +15,11 @@ export class App {
         };
 
         this.xmlParser = new XmlParser();
-        
-        // Inizializza FileUploader con l'oggetto options corretto
         this.fileUploader = new FileUploader({
             containerId: 'file-upload-container',
             onFileLoaded: this.handleFileLoaded.bind(this),
             onError: this.handleFileError.bind(this)
         });
-        
         this.dataDisplay = new DataDisplay('invoice-data-container');
         this.pdfExporter = new PdfExporter();
         this.errorMessage = document.getElementById('error-message');
@@ -46,7 +43,6 @@ export class App {
         });
     }
 
-    // Nuovo metodo per gestire il file caricato dal FileUploader
     handleFileLoaded(fileData) {
         console.log('File caricato:', fileData);
         
@@ -82,7 +78,6 @@ export class App {
         }
     }
 
-    // Nuovo metodo per gestire gli errori del FileUploader
     handleFileError(error) {
         console.error('Errore di caricamento file:', error);
         this.updateState({
@@ -92,7 +87,6 @@ export class App {
         this.showError();
     }
 
-    // Il vecchio metodo rimane come compatibilità ma ora delega al nuovo
     handleFileUploaded(file, content) {
         console.log('Metodo deprecato handleFileUploaded chiamato');
         this.handleFileLoaded({
@@ -109,7 +103,18 @@ export class App {
         }
 
         try {
-            this.pdfExporter.exportToPdf(this.state.parsedData, this.state.fileName);
+            this.pdfExporter.exportToPdf(this.state.parsedData)
+                .then(result => {
+                    if (result.success) {
+                        console.log(`PDF esportato con successo: ${result.fileName}`);
+                    } else {
+                        this.showError(`Errore durante l'esportazione: ${result.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Errore durante l\'esportazione in PDF:', error);
+                    this.showError(`Errore durante l'esportazione in PDF: ${error.message || 'Errore sconosciuto'}`);
+                });
         } catch (error) {
             console.error('Errore durante l\'esportazione in PDF:', error);
             this.showError(`Errore durante l'esportazione in PDF: ${error.message || 'Errore sconosciuto'}`);
