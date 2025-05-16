@@ -39,7 +39,7 @@ export class App {
         // Funzione per controllare e configurare gli elementi DOM in modo sicuro
         const initExportButton = () => {
             console.log('Cerco il pulsante export-pdf');
-            this.exportPdfButton = document.getElementById('export-pdf');
+            this.exportPdfButton = document.getElementById('exportToPdfBtn');
             if (this.exportPdfButton) {
                 console.log('Elemento #export-pdf trovato, aggiungo event listener');
                 this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
