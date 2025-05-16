@@ -1,3 +1,4 @@
+
 import FileUploader from './FileUploader.js';
 import DataDisplay from './DataDisplay.js';
 import PdfExporter from './PdfExporter.js';
@@ -26,18 +27,31 @@ export class App {
         this.invoiceDataContainer = document.getElementById('invoice-data-container');
         this.loadingIndicator = document.getElementById('loading-indicator');
         this.errorContainer = document.getElementById('error-container');
-        this.initEventListeners();
         
+        // Inizializza subito il pulsante di export se disponibile
+        this.exportPdfButton = document.getElementById('export-pdf');
+        if (this.exportPdfButton) {
+            this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
+            console.log('Export PDF button inizializzato');
+        } else {
+            console.warn('Elemento #export-pdf non trovato nel DOM al caricamento. Verrà cercato dopo il caricamento completo.');
+        }
+        
+        this.initEventListeners();
         console.log('App inizializzata');
     }
 
     initEventListeners() {
         document.addEventListener('DOMContentLoaded', () => {
-            this.exportPdfButton = document.getElementById('export-pdf');
-            if (this.exportPdfButton) {
-                this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
-            } else {
-                console.error('Elemento #export-pdf non trovato.');
+            // Se il pulsante non è stato trovato nel costruttore, riprova qui
+            if (!this.exportPdfButton) {
+                this.exportPdfButton = document.getElementById('export-pdf');
+                if (this.exportPdfButton) {
+                    this.exportPdfButton.addEventListener('click', this.handleExportPdf.bind(this));
+                    console.log('Export PDF button inizializzato dopo DOMContentLoaded');
+                } else {
+                    console.error('Elemento #export-pdf non trovato anche dopo DOMContentLoaded.');
+                }
             }
             console.log('Event listeners inizializzati');
         });
@@ -65,6 +79,12 @@ export class App {
                     isLoading: false
                 });
                 this.renderInvoiceData();
+                
+                // Abilita il pulsante di export dopo il caricamento dei dati
+                if (this.exportPdfButton) {
+                    this.exportPdfButton.disabled = false;
+                    console.log('Export PDF button abilitato');
+                }
             } else {
                 throw new Error('Formato file non supportato. Carica un file XML.');
             }
@@ -97,6 +117,8 @@ export class App {
     }
 
     handleExportPdf() {
+        console.log('handleExportPdf chiamato', this.state.parsedData);
+        
         if (!this.state.parsedData) {
             this.showError('Nessun dato disponibile per l\'esportazione');
             return;
@@ -139,7 +161,7 @@ export class App {
             this.loadingIndicator.classList.remove('hidden');
         }
         if (this.invoiceDataContainer) {
-            this.invoiceDataContainer.classList.remove('hidden');
+            this.invoiceDataContainer.classList.add('hidden');
         }
         this.hideError();
         console.log('Visualizzazione caricamento');
@@ -185,7 +207,8 @@ export class App {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// Assicurati che l'App venga inizializzata dopo il caricamento del DOM
+window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM caricato, inizializzazione App');
     window.app = new App();
 });
