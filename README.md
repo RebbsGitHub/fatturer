@@ -1,3 +1,3 @@
 # fatturer
 
-Fork della prima versione
+- Fork della prima versione.
